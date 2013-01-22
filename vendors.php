@@ -1,9 +1,9 @@
-<?php	 	
+<?php
 /*
  * Plugin Name: WP e-Commerce Vendors
  * Plugin URI: http://getshopped.org/vendors
  * Description: This Plugin provides some basic abilities of making users vendors, vendor-editor and vendor-administers,
- * allowing statistics to be provided on what they earned by selling goods on the site. 
+ * allowing statistics to be provided on what they earned by selling goods on the site.
  * Author: jghazally (taken over from vbakatis)
  * Version: 1.1
  * Author URI: http://screamingcodemonkey.com
@@ -12,7 +12,7 @@
 /**
  * This class makes sure all functions load at the right time and not just when WordPress calls it.
  *
- **/ 
+ **/
 
 class wpsc_vendors{
 
@@ -27,10 +27,10 @@ class wpsc_vendors{
 		add_action( 'personal_options_update' , array($this, 'save_new_profile'),10, 1);
 
 	}
-	
-	function getuserdetails($user){ 
+
+	function getuserdetails($user){
 	?>
-		<h3><?php	 	 _e('WP e-Commerce Vendors Details' , 'wpsc_vendors'); ?></h3>	
+		<h3><?php	 	 _e('WP e-Commerce Vendors Details' , 'wpsc_vendors'); ?></h3>
 		<table class="form-table">
 			<tbody>
 			<tr>
@@ -44,26 +44,26 @@ class wpsc_vendors{
 
 			</tbody>
 		</table>
-	<?php	 	
+	<?php
 		return;
 	}
-	
-		
+
+
 	// Create the function use in the action hook
-	
+
 	function vendor_add_dashboard_widgets() {
-		wp_add_dashboard_widget('vendor_dashboard_widget', 'Vendor Sales', array( $this, 'vendor_dashboard_widget_function'));	
-	} 
+		wp_add_dashboard_widget('vendor_dashboard_widget', 'Vendor Sales', array( $this, 'vendor_dashboard_widget_function'));
+	}
 	function vendor_dashboard_widget_function() {
 		// Display whatever it is you want to show
 		$this->wpsc_vendor_ps_ajax();
-		$this->wpsc_vendor_ps_selector();	
-	} 
-	
+		$this->wpsc_vendor_ps_selector();
+	}
+
 
 	function save_new_profile($user){
 		update_user_meta($_POST['user_id'], 'vendor_paypal', $_POST['vendor_paypal']);
-	
+
 	}
 	/**
 	 * Start setting up the Plugins Goods
@@ -79,7 +79,7 @@ class wpsc_vendors{
 		require_once('vendors_widget.php');
 		if(is_super_admin())
 			add_action('wp_dashboard_setup', array ( $this, 'vendor_add_dashboard_widgets' ) );
-		
+
 	}
 
 	/**
@@ -151,14 +151,14 @@ class wpsc_vendors{
 			return '<p>Sorry you do not have sufficient permission to edit vendor details</p>';
 
 		$vendors = get_post_meta( $post->ID, '_wpsc_vendors', true);
-		
+
 		foreach ( $blogusers as $user ) {
 //			$meta = get_user_meta($user->ID, 'wp_capabilities', true);
 			$meta = $user->meta_value;
 			$meta = maybe_unserialize( $meta );
 			if( !$meta['vendor']  && !$meta['vendor-administrator']  && !$meta['vendor-editor'] )
 				continue;
-			
+
 			$checked = '';
 			$rate = '';
 			if( isset( $vendors[$user->ID] ) ){
@@ -170,29 +170,26 @@ class wpsc_vendors{
 			<p>
 				<label for="wpsc_user_<?php	 	 echo $user->ID; ?>"><input type="checkbox" name="wpsc_vendors[<?php	 	 echo $user->ID; ?>][enabled]" <?php	 	 echo $checked; ?> id="wpsc_user_<?php	 	 echo $user->ID; ?>" value="true" /> <?php	 	 echo $user->user_login; ?>,</label><label for="wpsc_vendors[<?php	 	 echo $user->ID; ?>][rate]"> rate: <input type="text" name="wpsc_vendors[<?php	 	 echo $user->ID; ?>][rate]" value="<?php	 	 echo $rate; ?>" /></label>
 			<br /></p>
-		<?php	 	
+		<?php
 		}
 	}
 
 	/**
-	 * Make sure vendors can only see what you want them to see,, 
+	 * Make sure vendors can only see what you want them to see,,
 	 * @since 1.0
 	 */
 	function wpsc_vendors_setup_widgets(){
-		global $wpdb, $wp_meta_boxes, $current_user;
-		
-		get_currentuserinfo();
-		$capabilities = $wpdb->prefix . 'capabilities';
-		$capabilities = $current_user->data->$capabilities;
-		
-		if( isset( $capabilities['vendor'] ) || isset( $capabilities['vendor-administrator'] ) || isset( $capabilities['vendor-editor'] ) ) {
+		$is_vendor =    current_user_can( 'vendor'               )
+		             || current_user_can( 'vendor-administrator' )
+			         || current_user_can( 'vendor-editor'        );
+
+		if ( $is_vendor ) {
 			remove_action('wp_dashboard_setup', 'ses_wpscd_add_dashboard_widgets' );
 			remove_action('wp_dashboard_setup', 'wpsc_dashboard_widget_setup' );
 			remove_action('wp_dashboard_setup', 'wpsc_quarterly_setup' );
 			remove_action('wp_dashboard_setup', 'wpsc_dashboard_4months_widget_setup' );
 			wp_add_dashboard_widget( 'wpsc_vendor_product_sales', __('Product sales', 'wpsc-vendor'), array( $this, 'wpsc_vendor_product_sales' ) );
 		}
-		
 	}
 	/**
 	 * Initiate Dashboard Sales Section
@@ -205,7 +202,7 @@ class wpsc_vendors{
 		$this->wpsc_vendor_ps_selector();
 
 	}
-	
+
 	/**
 	 * The XHTML for selection box of perios in the Dashboard Widget
 	 * @since 1.0
@@ -236,9 +233,9 @@ class wpsc_vendors{
 		</script>
 		<a href="<?php	 	 echo admin_url('?vendor_get_emails=true'); ?>">Download email list</a>
 	</div>
-	<?php	 	
+	<?php
 	}
-	
+
 	/**
 	 * Get the Period of product sales requested
 	 * @since 1.0
@@ -269,7 +266,7 @@ class wpsc_vendors{
 		$users = array();
 		//If your not super admin then your a vendor
 		if(!is_super_admin()){
-			get_currentuserinfo();		
+			get_currentuserinfo();
 			$users[] = $current_user;
 		}else{
 			$users = get_users(array('role'=>'vendor-administrator') );
@@ -295,7 +292,7 @@ class wpsc_vendors{
 				$mindate = mktime(0,0,0,12,1,date('Y')-1);
 			else
 				$mindate = mktime(0,0,0,date('n')-1,1,date('Y'));
-			
+
 			$maxdate = mktime(0,0,0,date('n'),0,date('Y'));
 			break;
 
@@ -329,7 +326,7 @@ class wpsc_vendors{
 	                          GROUP BY c.prodid
 			                  ORDER BY product_revenue DESC, num_items DESC";
 		$wpsc_vendor_result_rows = $wpdb->get_results($wpdb->prepare($wpsc_vendor_query),ARRAY_A);
-		
+
 ?>
 		<style type="text/css">
 			.ses-wpscd-table {
@@ -365,9 +362,9 @@ class wpsc_vendors{
 		</style>
 		<div id="wpsc-vendor-product-sales">
 			<table width="100%" class="ses-wpscd-table">
-		<?php	 	 			
-		foreach($users as $user){ 
-		
+		<?php
+		foreach($users as $user){
+
 			$output .= '<tr class="ses-wpscd-headerrow"><th class="ses-wpscd-left">Product</th><th>Units</th><th>Rate</th><th>Revenue</th><th class="ses-wpscd-right">Profit</th></tr>';
 
 
@@ -378,9 +375,9 @@ class wpsc_vendors{
 
 				$sales_found = 0;
 				$total = 0;
-	
+
 				foreach ($wpsc_vendor_result_rows as $row) {
-					$vendors = get_product_meta( $row['id'], 'vendors', true );				
+					$vendors = get_product_meta( $row['id'], 'vendors', true );
 					if( !$vendors )
 						continue;
 					$vendors = maybe_unserialize($vendors);
@@ -393,7 +390,7 @@ class wpsc_vendors{
 						if( $vendors[$user->ID]['rate'] )
 							$rate = $vendors[$user->ID]['rate']/100;
 					$output .= "<tr class=\"ses-wpscd-row\">";
-	
+
 					$output .= "<td class=\"ses-wpscd-cell ses-wpscd-left\">".htmlentities($row['name'])."</td>";
 					$output .= "<td class=\"ses-wpscd-cell\">".htmlentities($row['num_items'])."</td>";
 					$output .= "<td class=\"ses-wpscd-cell\">" . $rate*100 . '%</td>';
@@ -402,7 +399,7 @@ class wpsc_vendors{
 					$output .= "<td class=\"ses-wpscd-cell ses-wpscd-right\">" . wpsc_currency_display( ( (float) $row['product_revenue'] ) * $rate ) . "</td>";
 					$output .= "</tr>";
 					$total += $row['product_revenue'] * $rate;
-		
+
 				}
 				if($total > 0){
 					if(is_super_admin()){
@@ -422,13 +419,13 @@ class wpsc_vendors{
 							<input type='hidden' name='undefined_quantity' value='0' />
 							<input type='submit' name='submit' value='Pay ".$user->user_login."' />
 							</form>\n\r";
-						
+
 						}
-						
+
 					}
 					$output .="<tr><td colspan='3'>&nbsp;</td><td>".$user->user_login." total: </td><td class='ses-wpscd-cell ses-wpscd-right'>".wpsc_currency_display($total).$pay."</td></tr>";
-					
-				}	
+
+				}
 				if( !$sales_found )
 					$output .= "<td class=\"ses-wpscd-cell\" colspan=5>No Sales In Selected Period</td>";
 			}
@@ -438,7 +435,7 @@ class wpsc_vendors{
 ?>
 			</table>
 		</div>
-		<?php	 	
+		<?php
 		// If this is an AJAX update exit()
 		if ($exit)
 			exit();
@@ -461,7 +458,7 @@ function wpsc_vendor_print_emails(){
 	     	                 FROM {$wpdb->prefix}wpsc_cart_contents c
                              LEFT JOIN {$wpdb->prefix}wpsc_purchase_logs pl
                                 ON c.purchaseid = pl.id
-                             WHERE pl.processed IN (3,4,5) 
+                             WHERE pl.processed IN (3,4,5)
                           ";
 	$wpsc_vendor_emails = $wpdb->get_results( $wpsc_vendor_query, ARRAY_A );
 	foreach ((array)$wpsc_vendor_emails as $row) {
@@ -479,9 +476,9 @@ function wpsc_vendor_print_emails(){
 		$first = $wpdb->get_var('SELECT `value` FROM  `wp_wpsc_submited_form_data` WHERE  `log_id` ='.$row['log_id'].' AND  `form_id` = 2');
 		$last = $wpdb->get_var('SELECT `value` FROM  `wp_wpsc_submited_form_data` WHERE  `log_id` ='.$row['log_id'].' AND  `form_id` = 3');
 		echo $first . '|' . $last . '|' . $email . '|' . $row['log_id'] . '
-';				
+';
 	}
 	exit();
-	
+
 }
 ?>
