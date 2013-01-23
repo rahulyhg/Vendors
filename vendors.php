@@ -151,12 +151,13 @@ class wpsc_vendors{
 			return '<p>Sorry you do not have sufficient permission to edit vendor details</p>';
 
 		$vendors = get_post_meta( $post->ID, '_wpsc_vendors', true);
+		foreach ( $blogusers as $user_id ) {
+			$user = new WP_User( $user_id );
+			$is_vendor =    $user->has_cap( 'vendor'               )
+			             || $user->has_cap( 'vendor-administrator' )
+			             || $user->has_cap( 'vendor-editor'        );
 
-		foreach ( $blogusers as $user ) {
-//			$meta = get_user_meta($user->ID, 'wp_capabilities', true);
-			$meta = $user->meta_value;
-			$meta = maybe_unserialize( $meta );
-			if( !$meta['vendor']  && !$meta['vendor-administrator']  && !$meta['vendor-editor'] )
+			if( ! $is_vendor )
 				continue;
 
 			$checked = '';
