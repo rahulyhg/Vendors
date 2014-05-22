@@ -5,7 +5,7 @@
  * Description: This Plugin provides some basic abilities of making users vendors, vendor-editor and vendor-administers,
  * allowing statistics to be provided on what they earned by selling goods on the site.
  * Author: jghazally (taken over from vbakatis)
- * Version: 1.1
+ * Version: 1.2
  * Author URI: http://screamingcodemonkey.com
  */
 
